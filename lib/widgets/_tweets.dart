@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:dio/dio.dart';
 
 class TweetsPage extends StatefulWidget {
   @override
@@ -6,43 +7,49 @@ class TweetsPage extends StatefulWidget {
 }
 
 class _TweetsPage extends State<TweetsPage> {
+  Dio dio = Dio();
+  List tweets = [];
+
+  void getTweets() {
+    dio.get("https://salty-plateau-23982.herokuapp.com/").then((response) {
+      setState(() {
+        tweets = response.data['statuses'];
+      });
+    }).catchError((err) {
+      print(err);
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    getTweets();
+  }
+
   @override
   Widget build(BuildContext context) {
     var tweetsView = ListView.builder(
+      itemCount: tweets.length,
       itemBuilder: (context, index) {
         final double _deviceWidth = MediaQuery.of(context).size.width;
-
+        Map tweet = tweets[index];
         return Container(
           padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 7.5),
           width: _deviceWidth,
           decoration: BoxDecoration(
-            color: Colors.blueGrey,
+            color: Color.fromRGBO(36,52,71,1.0)    ,
             border: Border(
-              bottom:
-                  Divider.createBorderSide(context, color: Colors.black87),
+              bottom: Divider.createBorderSide(context, color: Colors.black87),
             ),
           ),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 3.0, vertical: 3.0),
-                child: Container(
-                  height: 60.0,
-                  width: 60.0,
-                  decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(30.0),
-                      border: Border.all(
-                        width: 1.0,
-                        style: BorderStyle.solid,
-                        color: Colors.blueGrey
-                      ),
-                      image: DecorationImage(
-                        image: AssetImage('assets/koof.jpg'),
-                        fit: BoxFit.cover,
-                      )),
-                ),
-              ),             
+              CircleAvatar(
+                backgroundImage: NetworkImage(tweet['user']['profile_image_url']),
+                backgroundColor: Colors.white,
+                radius: 20.0,
+              ),
               Expanded(
                 child: Container(
                   width: _deviceWidth,
@@ -51,9 +58,12 @@ class _TweetsPage extends State<TweetsPage> {
                     children: <Widget>[
                       Container(
                         width: _deviceWidth,
-                        padding: EdgeInsets.symmetric(vertical: 7.5, horizontal: 0.0),
-                        child: Text(
-                          '@KoofNG',
+                        padding: EdgeInsets.symmetric(
+                            vertical: 7.5, horizontal: 0.0),
+                        child: Row(
+                          children: <Widget>[
+                            Text(
+                          tweet['user']['name'],
                           textDirection: TextDirection.ltr,
                           style: TextStyle(
                             color: Colors.white,
@@ -61,12 +71,24 @@ class _TweetsPage extends State<TweetsPage> {
                             fontSize: 14.0,
                           ),
                         ),
+                        Text(
+                          ' - @'+tweet['user']['screen_name'],
+                          textDirection: TextDirection.ltr,
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w200,
+                            fontSize: 12.0,
+                          ),
+                        ),
+                          ],
+                        )
                       ),
                       Container(
                         width: _deviceWidth,
-                        padding: EdgeInsets.symmetric(vertical: 2.5, horizontal: 0.0),
+                        padding: EdgeInsets.symmetric(
+                            vertical: 2.5, horizontal: 0.0),
                         child: Text(
-                          'Whats up Fellas, how has the year being thus far, 2019 my year of technological breakthroughs. Try harder my gentle Self. KoofNG',
+                         tweet['text'],
                           style: TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.w300,
@@ -149,7 +171,7 @@ class _TweetsPage extends State<TweetsPage> {
                                     padding: EdgeInsets.symmetric(
                                         vertical: 7.5, horizontal: 2.0),
                                     child: Text(
-                                      '12',
+                                      tweet['favorite_count'].toString(),
                                       textAlign: TextAlign.left,
                                       style: TextStyle(
                                         color: Colors.grey,
@@ -188,7 +210,7 @@ class _TweetsPage extends State<TweetsPage> {
                                     padding: EdgeInsets.symmetric(
                                         vertical: 7.5, horizontal: 2.0),
                                     child: Text(
-                                      '12',
+                                      tweet['retweet_count'].toString(),
                                       textAlign: TextAlign.left,
                                       style: TextStyle(
                                         color: Colors.grey,
