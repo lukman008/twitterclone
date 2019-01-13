@@ -9,7 +9,7 @@ class MyApp extends StatelessWidget{
       return MaterialApp(
         title: 'Twitter',
         theme: ThemeData(
-          primarySwatch: Colors.blueGrey,         
+          primaryColor: Color.fromRGBO(36,52,71,1.0)      
         ),
         home: Timeline(),
       );
